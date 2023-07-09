@@ -43,8 +43,8 @@ public class WeatherService {
 
 
         if (todayForecast.isPresent() && tomorrowForecast.isPresent()) {
-            LOGGER.info("Forecasts for city {} for today and tomorrow already exist", city);
-            throw new ForecastForCityAlreadyExistsException("Forecast for city " + city + " for today and tomorrow already exists");
+            LOGGER.info("Forecasts for the city {} for today and tomorrow already exist", city);
+            throw new ForecastForCityAlreadyExistsException("Forecast for the city " + city + " for today and tomorrow already exists");
         }
 
         String url = buildApiUrl(city);
@@ -60,15 +60,15 @@ public class WeatherService {
             weatherResponse = restTemplate.getForObject(url, WeatherResponse.class);
         } catch (HttpClientErrorException ex) {
             if (ex.getStatusCode().is4xxClientError()) {
-                LOGGER.warn("City {} not found.", city);
-                throw new CityNotFoundException("City not found " + city);
+                LOGGER.warn("The City {} not found.", city);
+                throw new CityNotFoundException("The City not found " + city);
             }
             throw ex;
         }
 
         if (weatherResponse == null || weatherResponse.getForecast() == null) {
-            LOGGER.warn("Forecast for city not found {}", city);
-            throw new ForecastNotFoundException("Forecast for city " + city + " not found");
+            LOGGER.warn("Forecast for the city not found {}", city);
+            throw new ForecastNotFoundException("Forecast for the city " + city + " not found");
         }
         return weatherResponse;
     }
@@ -118,7 +118,7 @@ public class WeatherService {
         List<Forecast> forecasts = forecastRepository.findAll();
 
         if (forecasts.isEmpty()) {
-            LOGGER.warn("No forecasts are found for the city Madrid");
+            LOGGER.warn("No forecasts are found for the city");
             throw new ForecastsNotFoundException("No forecasts are available.");
         }
 
