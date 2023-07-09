@@ -7,8 +7,14 @@ This application is a Spring Boot application that allows users to save and retr
 - Java 20
 - Maven
 
-## Run Locally
+## Setting Up
+The application requires a WeatherAPI key to function. After obtaining a key, 
+it should be added to the application.yml file in the following format:
 
+```yaml
+weather-api:
+  key: YOUR_WEATHER_API_KEY
+```
 To run the application, you need to follow these steps:
 
 1. Clone the repository
