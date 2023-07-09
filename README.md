@@ -12,24 +12,24 @@ This application is a Spring Boot application that allows users to save and retr
 To run the application, you need to follow these steps:
 
 1. Clone the repository
-\```bash
+```bash
 git clone https://github.com/username/repository.git
-\```
+```
 
 2. Navigate into the directory
-\```bash
+```bash
 cd repository
-\```
+```
 
 3. Build the project with Maven
-\```bash
+```bash
 mvn clean install
-\```
+```
 
 4. Run the application
-\```bash
+```bash
 mvn spring-boot:run
-\```
+```
 
 ## API Usage
 
