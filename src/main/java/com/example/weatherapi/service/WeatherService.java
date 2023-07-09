@@ -7,6 +7,7 @@ import com.example.weatherapi.exception.ForecastNotFoundException;
 import com.example.weatherapi.exception.ForecastsNotFoundException;
 import com.example.weatherapi.model.Forecast;
 import com.example.weatherapi.repository.ForecastRepository;
+import com.example.weatherapi.response.ForecastDto;
 import com.example.weatherapi.response.WeatherResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class WeatherService {
@@ -36,94 +38,103 @@ public class WeatherService {
         this.config = config;
     }
 
-    public Optional<WeatherResponse> fetchAndSaveForecast(String city) {
+    public void fetchAndSaveForecast(String city) {
         Optional<Forecast> todayForecast = getForecastForDay(city, LocalDate.now());
         Optional<Forecast> tomorrowForecast = getForecastForDay(city, LocalDate.now().plusDays(1));
+
 
         if (todayForecast.isPresent() && tomorrowForecast.isPresent()) {
             LOGGER.info("Forecasts for city {} for today and tomorrow already exist", city);
             throw new ForecastForCityAlreadyExistsException("Forecast for city " + city + " for today and tomorrow already exists");
         }
 
-        return fetchFromApiAndSave(city, todayForecast, tomorrowForecast);
+        String url = buildApiUrl(city);
+        WeatherResponse weatherResponse = fetchWeatherData(city, url);
+        saveForecastIfNeeded(city, todayForecast, weatherResponse.getForecast().getForecastday().get(0));
+        saveForecastIfNeeded(city, tomorrowForecast, weatherResponse.getForecast().getForecastday().get(1));
     }
 
 
-    private Optional<WeatherResponse> fetchFromApiAndSave(String city, Optional<Forecast> todayForecast, Optional<Forecast> tomorrowForecast) {
-        String url = UriComponentsBuilder.fromHttpUrl("http://api.weatherapi.com/v1/forecast.json")
-                .queryParam("key", config.getKey())
-                .queryParam("q", city)
-                .queryParam("days", config.getDays())
-                .toUriString();
-
+    private WeatherResponse fetchWeatherData(String city, String url) {
+        WeatherResponse weatherResponse = null;
         try {
-            WeatherResponse weatherResponse = restTemplate.getForObject(url, WeatherResponse.class);
-            if (weatherResponse == null) {
-                LOGGER.error("Forecast for city not found {}", city);
-                throw new ForecastNotFoundException("Forecast for city " + city + " not found");
-            }
-
-            WeatherResponse.ForecastDay fetchedToday = weatherResponse.getForecast().getForecastday().get(0);
-            WeatherResponse.ForecastDay fetchedTomorrow = weatherResponse.getForecast().getForecastday().get(1);
-
-            if (todayForecast.isEmpty()) {
-                saveForecast(city, fetchedToday);
-            }
-
-            if (tomorrowForecast.isEmpty()) {
-                saveForecast(city, fetchedTomorrow);
-            }
-
-            return Optional.of(weatherResponse);
+            weatherResponse = restTemplate.getForObject(url, WeatherResponse.class);
         } catch (HttpClientErrorException ex) {
             if (ex.getStatusCode().is4xxClientError()) {
-                LOGGER.error("City {} not found.", city);
+                LOGGER.warn("City {} not found.", city);
                 throw new CityNotFoundException("City not found " + city);
             }
             throw ex;
         }
+
+        if (weatherResponse == null || weatherResponse.getForecast() == null) {
+            LOGGER.warn("Forecast for city not found {}", city);
+            throw new ForecastNotFoundException("Forecast for city " + city + " not found");
+        }
+        return weatherResponse;
+    }
+
+    private void saveForecastIfNeeded(String city, Optional<Forecast> forecast, WeatherResponse.ForecastDay fetchedForecastDay) {
+        if (forecast.isEmpty() && fetchedForecastDay != null) {
+            saveForecast(city, fetchedForecastDay);
+        }
+    }
+
+    private String buildApiUrl(String city) {
+        return UriComponentsBuilder.fromHttpUrl("http://api.weatherapi.com/v1/forecast.json")
+                .queryParam("key", config.getKey())
+                .queryParam("q", city)
+                .queryParam("days", config.getDays())
+                .toUriString();
     }
 
     private Optional<Forecast> getForecastForDay(String city, LocalDate date) {
-        Optional<Forecast> forecast = forecastRepository.findByCityAndDate(city, date);
-        forecast.ifPresent(f -> LOGGER.info("Forecast for city {} and date {} already exists", city, date));
-        return forecast;
+        return forecastRepository.findByCityAndDate(city, date);
     }
 
-    public Optional<List<Forecast>> fetchTodaysAndTomorrowsForecast(String city) {
+    public List<ForecastDto> fetchTodaysAndTomorrowsForecasts(String city) {
+        LOGGER.info("Start fetching todays and tomorrows forecasts for city {}", city);
         LocalDate today = LocalDate.now();
         LocalDate tomorrow = today.plusDays(1);
 
         List<Forecast> forecasts = new ArrayList<>();
 
-        Optional<Forecast> todayForecast = getOrFetchForecast(city, today);
-        Optional<Forecast> tomorrowForecast = getOrFetchForecast(city, tomorrow);
+        Optional<Forecast> todayForecast = getForecastForDay(city, today);
+        Optional<Forecast> tomorrowForecast = getForecastForDay(city, tomorrow);
 
         todayForecast.ifPresent(forecasts::add);
         tomorrowForecast.ifPresent(forecasts::add);
 
         if (forecasts.isEmpty()) {
-            return Optional.empty();
+            LOGGER.warn("Forecast not found for the city {} for today and tomorrow", city);
+            throw new ForecastNotFoundException("Forecast not found for the city " + city + " for today and tomorrow");
         }
-
-        return Optional.of(forecasts);
+        LOGGER.info("End fetching todays and tomorrows forecasts for city {}", city);
+        return forecasts.stream()
+                .map(this::toForecastResponse)
+                .toList();
     }
 
-    public List<Forecast> fetchAllForecasts() {
+
+    public List<ForecastDto> fetchAllForecasts() {
+        LOGGER.info("Start fetching all forecasts");
         List<Forecast> forecasts = forecastRepository.findAll();
 
         if (forecasts.isEmpty()) {
+            LOGGER.warn("No forecasts are found for the city Madrid");
             throw new ForecastsNotFoundException("No forecasts are available.");
         }
 
         forecasts.sort(Comparator.comparing(Forecast::getCity));
-
-        return forecasts;
+        LOGGER.info("End fetching all forecasts");
+        return forecasts.stream()
+                .map(this::toForecastResponse)
+                .toList();
     }
 
     private void saveForecast(String city, WeatherResponse.ForecastDay forecastDay) {
         LocalDate date = forecastDay.getDate();
-        LOGGER.info("Start fetching and saving forecast for city: {} and date {}", city, date);
+        LOGGER.info("Start saving forecast for city: {} and date {}", city, date);
 
         Optional<Forecast> existingForecast = forecastRepository.findByCityAndDate(city, date);
         if (existingForecast.isPresent()) {
@@ -134,20 +145,7 @@ public class WeatherService {
         Forecast forecast = toForecast(city, forecastDay);
 
         forecastRepository.save(forecast);
-        LOGGER.info("End fetching and saving forecast for city: {} and date {}", city, date);
-    }
-
-    private Optional<Forecast> getOrFetchForecast(String city, LocalDate date) {
-        Optional<Forecast> forecast = forecastRepository.findByCityAndDate(city, date);
-
-        if (!forecast.isPresent()) {
-            Optional<WeatherResponse> response = fetchAndSaveForecast(city);
-            if (response.isPresent()) {
-                forecast = forecastRepository.findByCityAndDate(city, date);
-            }
-        }
-
-        return forecast;
+        LOGGER.info("End saving forecast for city: {} and date {}", city, date);
     }
 
     private Forecast toForecast(String city, WeatherResponse.ForecastDay forecastDay) {
@@ -160,5 +158,14 @@ public class WeatherService {
         forecast.setAvghumidity(forecastDay.getDay().getAvghumidity());
         forecast.setConditionText(forecastDay.getDay().getCondition().getText());
         return forecast;
+    }
+    private ForecastDto toForecastResponse(Forecast forecast) {
+        ForecastDto forecastDto = new ForecastDto();
+        forecastDto.setMaxTempC(Double.valueOf(forecast.getMaxtempC()));
+        forecastDto.setMaxTempC(Double.valueOf(forecast.getMintempC()));
+        forecastDto.setTotalPrecipMm(Double.valueOf(forecast.getTotalprecipMm()));
+        forecastDto.setAvgHumidity(Double.valueOf(forecast.getAvghumidity()));
+        forecastDto.setCondition(forecast.getConditionText());
+        return forecastDto;
     }
 }
