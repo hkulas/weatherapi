@@ -20,7 +20,7 @@ public class Forecast {
     private Double mintempC;
     private Double totalprecipMm;
     private Double avghumidity;
-    private String conditionText;
+    private String condition;
 
     public Long getId() {
         return id;
@@ -74,11 +74,11 @@ public class Forecast {
         this.avghumidity = avghumidity;
     }
 
-    public String getConditionText() {
-        return conditionText;
+    public String getCondition() {
+        return condition;
     }
 
-    public void setConditionText(String conditionText) {
-        this.conditionText = conditionText;
+    public void setCondition(String condition) {
+        this.condition = condition;
     }
 }

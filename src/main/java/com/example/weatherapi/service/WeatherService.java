@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class WeatherService {
@@ -88,12 +87,11 @@ public class WeatherService {
                 .toUriString();
     }
 
-    private Optional<Forecast> getForecastForDay(String city, LocalDate date) {
+    public Optional<Forecast> getForecastForDay(String city, LocalDate date) {
         return forecastRepository.findByCityAndDate(city, date);
     }
 
     public List<ForecastDto> fetchTodaysAndTomorrowsForecasts(String city) {
-        LOGGER.info("Start fetching todays and tomorrows forecasts for city {}", city);
         LocalDate today = LocalDate.now();
         LocalDate tomorrow = today.plusDays(1);
 
@@ -114,7 +112,6 @@ public class WeatherService {
                 .map(this::toForecastResponse)
                 .toList();
     }
-
 
     public List<ForecastDto> fetchAllForecasts() {
         LOGGER.info("Start fetching all forecasts");
@@ -156,7 +153,7 @@ public class WeatherService {
         forecast.setMintempC(forecastDay.getDay().getMintemp_c());
         forecast.setTotalprecipMm(forecastDay.getDay().getTotalprecip_mm());
         forecast.setAvghumidity(forecastDay.getDay().getAvghumidity());
-        forecast.setConditionText(forecastDay.getDay().getCondition().getText());
+        forecast.setCondition(forecastDay.getDay().getCondition().getText());
         return forecast;
     }
     private ForecastDto toForecastResponse(Forecast forecast) {
@@ -165,7 +162,7 @@ public class WeatherService {
         forecastDto.setMaxTempC(Double.valueOf(forecast.getMintempC()));
         forecastDto.setTotalPrecipMm(Double.valueOf(forecast.getTotalprecipMm()));
         forecastDto.setAvgHumidity(Double.valueOf(forecast.getAvghumidity()));
-        forecastDto.setCondition(forecast.getConditionText());
+        forecastDto.setCondition(forecast.getCondition());
         return forecastDto;
     }
 }
