@@ -195,10 +195,10 @@ public class WeatherServiceTest {
         forecastDay.setDate(date);
 
         WeatherResponse.Day day = new WeatherResponse.Day();
-        day.setAvghumidity(humidity);
-        day.setMaxtemp_c(maxTemp);
-        day.setMintemp_c(minTemp);
-        day.setTotalprecip_mm(totalPrecip);
+        day.setAvgHumidity(humidity);
+        day.setMaxtempC(maxTemp);
+        day.setMintempC(minTemp);
+        day.setTotalprecipMm(totalPrecip);
 
         WeatherResponse.Condition condition = new WeatherResponse.Condition();
         condition.setText(conditionText);

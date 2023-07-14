@@ -149,15 +149,16 @@ public class WeatherService {
         Forecast forecast = new Forecast();
         forecast.setCity(city);
         forecast.setDate(forecastDay.getDate());
-        forecast.setMaxtempC(forecastDay.getDay().getMaxtemp_c());
-        forecast.setMintempC(forecastDay.getDay().getMintemp_c());
-        forecast.setTotalprecipMm(forecastDay.getDay().getTotalprecip_mm());
-        forecast.setAvghumidity(forecastDay.getDay().getAvghumidity());
+        forecast.setMaxtempC(forecastDay.getDay().getMaxtempC());
+        forecast.setMintempC(forecastDay.getDay().getMintempC());
+        forecast.setTotalprecipMm(forecastDay.getDay().getTotalprecipMm());
+        forecast.setAvghumidity(forecastDay.getDay().getAvgHumidity());
         forecast.setCondition(forecastDay.getDay().getCondition().getText());
         return forecast;
     }
     private ForecastDto toForecastResponse(Forecast forecast) {
         ForecastDto forecastDto = new ForecastDto();
+        forecastDto.setCity(forecast.getCity());
         forecastDto.setMaxTempC(Double.valueOf(forecast.getMaxtempC()));
         forecastDto.setMinTempC(Double.valueOf(forecast.getMintempC()));
         forecastDto.setTotalPrecipMm(Double.valueOf(forecast.getTotalprecipMm()));

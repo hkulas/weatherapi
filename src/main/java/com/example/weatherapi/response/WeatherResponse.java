@@ -1,6 +1,7 @@
 package com.example.weatherapi.response;
 
 import com.example.weatherapi.exception.CustomError;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -79,42 +80,46 @@ public class WeatherResponse {
     }
 
     public static class Day {
-        private double maxtemp_c;
-        private double mintemp_c;
-        private double totalprecip_mm;
-        private double avghumidity;
+        @JsonProperty("maxtemp_c")
+        private double maxtempC;
+        @JsonProperty("mintemp_c")
+        private double mintempC;
+        @JsonProperty("totalprecip_mm")
+        private double totalprecipMm;
+        @JsonProperty("avghumidity")
+        private double avgHumidity;
         private Condition condition;
 
-        public double getMaxtemp_c() {
-            return maxtemp_c;
+        public double getMaxtempC() {
+            return maxtempC;
         }
 
-        public void setMaxtemp_c(double maxtemp_c) {
-            this.maxtemp_c = maxtemp_c;
+        public void setMaxtempC(double maxtempC) {
+            this.maxtempC = maxtempC;
         }
 
-        public double getMintemp_c() {
-            return mintemp_c;
+        public double getMintempC() {
+            return mintempC;
         }
 
-        public void setMintemp_c(double mintemp_c) {
-            this.mintemp_c = mintemp_c;
+        public void setMintempC(double mintempC) {
+            this.mintempC = mintempC;
         }
 
-        public double getTotalprecip_mm() {
-            return totalprecip_mm;
+        public double getTotalprecipMm() {
+            return totalprecipMm;
         }
 
-        public void setTotalprecip_mm(double totalprecip_mm) {
-            this.totalprecip_mm = totalprecip_mm;
+        public void setTotalprecipMm(double totalprecipMm) {
+            this.totalprecipMm = totalprecipMm;
         }
 
-        public double getAvghumidity() {
-            return avghumidity;
+        public double getAvgHumidity() {
+            return avgHumidity;
         }
 
-        public void setAvghumidity(double avghumidity) {
-            this.avghumidity = avghumidity;
+        public void setAvgHumidity(double avgHumidity) {
+            this.avgHumidity = avgHumidity;
         }
 
         public Condition getCondition() {

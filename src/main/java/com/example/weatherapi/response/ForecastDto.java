@@ -1,11 +1,21 @@
 package com.example.weatherapi.response;
 
 public class ForecastDto {
+
+    private String city;
     private double maxTempC;
     private double minTempC;
     private double totalPrecipMm;
     private double avgHumidity;
     private String condition;
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
 
     public double getMaxTempC() {
         return maxTempC;
