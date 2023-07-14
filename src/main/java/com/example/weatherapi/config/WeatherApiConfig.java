@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 public class WeatherApiConfig {
     private String key;
     private int days;
+    private String url;
 
     public String getKey() {
         return key;
@@ -23,5 +24,13 @@ public class WeatherApiConfig {
 
     public void setDays(int days) {
         this.days = days;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
     }
 }

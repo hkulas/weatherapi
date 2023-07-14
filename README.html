@@ -1,0 +1,59 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WeatherAPI Documentation</title>
+</head>
+<body>
+    <h1>WeatherAPI Documentation</h1>
+
+    <h2>Overview</h2>
+    <p>
+        The WeatherAPI is a RESTful service for saving and retrieving weather forecasts.
+    </p>
+
+    <h2>Setting Up</h2>
+    <p>
+        The application requires a WeatherAPI key to function. After obtaining a key, 
+        it should be added to the application.yml file in the following format:
+    </p>
+    <pre><code>
+        weather-api:
+          key: YOUR_WEATHER_API_KEY
+    </code></pre>
+
+    <h2>Running the application locally</h2>
+    <pre><code>
+	git clone https://github.com/username/repository.git
+	cd repository
+	mvn clean install
+    ./mvnw spring-boot:run
+    </code></pre>
+
+    <h2>API Endpoints</h2>
+    <h3>POST /api/weather/forecast/{city}</h3>
+    <p>Saves forecasts for today and tomorrow for chosen city.</p>
+    <h4>Responses:</h4>
+    <ul>
+        <li>200: Successfully saved forecasts.</li>
+        <li>404: The city not found.</li>
+        <li>409: Forecast for the city for today and tomorrow already exists.</li>
+    </ul>
+
+    <h3>GET /api/weather/forecast/{city}</h3>
+    <p>Get a list of forecasts for today and tomorrow for chosen city.</p>
+    <h4>Responses:</h4>
+    <ul>
+        <li>200: Successfully retrieved a list of todays and tomorrows forecasts.</li>
+        <li>404: A forecast for city was not found.</li>
+    </ul>
+
+    <h3>GET /api/weather/forecast</h3>
+    <p>Get a list of all available forecasts.</p>
+    <h4>Responses:</h4>
+    <ul>
+        <li>200: Successfully retrieved a list of forecasts.</li>
+        <li>404: No forecasts found.</li>
+    </ul>
+</body>
+</html>

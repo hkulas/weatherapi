@@ -80,7 +80,7 @@ public class WeatherService {
     }
 
     private String buildApiUrl(String city) {
-        return UriComponentsBuilder.fromHttpUrl("http://api.weatherapi.com/v1/forecast.json")
+        return UriComponentsBuilder.fromHttpUrl(config.getUrl())
                 .queryParam("key", config.getKey())
                 .queryParam("q", city)
                 .queryParam("days", config.getDays())
@@ -159,7 +159,7 @@ public class WeatherService {
     private ForecastDto toForecastResponse(Forecast forecast) {
         ForecastDto forecastDto = new ForecastDto();
         forecastDto.setMaxTempC(Double.valueOf(forecast.getMaxtempC()));
-        forecastDto.setMaxTempC(Double.valueOf(forecast.getMintempC()));
+        forecastDto.setMinTempC(Double.valueOf(forecast.getMintempC()));
         forecastDto.setTotalPrecipMm(Double.valueOf(forecast.getTotalprecipMm()));
         forecastDto.setAvgHumidity(Double.valueOf(forecast.getAvghumidity()));
         forecastDto.setCondition(forecast.getCondition());
