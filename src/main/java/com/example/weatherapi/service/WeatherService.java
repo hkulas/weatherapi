@@ -115,14 +115,13 @@ public class WeatherService {
 
     public List<ForecastDto> fetchAllForecasts() {
         LOGGER.info("Start fetching all forecasts");
-        List<Forecast> forecasts = forecastRepository.findAll();
+        List<Forecast> forecasts = forecastRepository.findAllByOrderByCityAsc();
 
         if (forecasts.isEmpty()) {
             LOGGER.warn("No forecasts are found for the city");
             throw new ForecastsNotFoundException("No forecasts are available.");
         }
 
-        forecasts.sort(Comparator.comparing(Forecast::getCity));
         LOGGER.info("End fetching all forecasts");
         return forecasts.stream()
                 .map(this::toForecastResponse)
